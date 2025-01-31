@@ -12,7 +12,6 @@ connectDB();
 
 app.use(express.json());
 
-app.use("/api/v1/auth", authrouter);
 
 app.get("/",(req, res) =>{
     res.status(200).json({
@@ -29,7 +28,8 @@ app.use("/auth/api", productrouter);
 app.use((req, res) =>{
     res.status(404).json({
         success: false,
-        message: "route not found"
+        message: "route not found",
+        question: "ustaad wa maxay steps ka la igarabo si an u dhiso backend dhamestiran am secure ah "
     })
 });
 

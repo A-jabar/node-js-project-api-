@@ -1,54 +1,56 @@
-const products = require("../models/products");
+const Product = require("../models/products");
 
-exports.createproduct = async (req, res, next) =>{
+exports.getProducts = async (req, res, next) => {
     try {
-        const {name, description, price, image, category, quantity} = req.body;
-        const productExists = await products.findOne({name});
-        if(productExists){
-          const updateProduct = await products.findOneAndUpdate({name}, {quantity});
-          res.status(201).json({
-            success: true,
-            message: "product is alrady existing but we only updated he quantity and the peice",
-            product: updateProduct
-          });
-          return;
-        }
 
-        const createProduct = await products.create({
-            name,
-            description,
-            price,
-            image,
-            category,
-            quantity
+        const products = await Product.find({});
+
+        res.status(200).json({
+            success: true,
+            message: "Products fetched successfully",
+            data: products
         });
-        res.status(200).json({
-            success: true,
-            message: "product created successfully"
-        })
-    } catch (err) {
-        next(err);
+
+    } catch (error) {
+        next(error);
     }
 }
 
-exports.displayproducts = async (req, res, next) =>{
+exports.createProduct = async (req, res, next) => {
     try {
-        const product = await products.find({});
+
+        const {name,price, category, description, image, rating, numReviews,countInStock} = req.body;
+
+        const productExists = await Product.findOne({name});
+
+        if(productExists){
+            const updateProduct = await products.findOneAndUpdate({price}, {rating}, {countInStock}, {new: true});
+            res.status(201).json({
+              success: true,
+              message: "product is alrady existing but we  updated only the countInStock, rating and the price",
+              product: updateProduct
+            });
+            return;
+          }
+
+        const product = await Product.create({name,price, category, description, image, rating, numReviews,countInStock});
+
         res.status(200).json({
             success: true,
-            product
-        })
-        
-    } catch (err) {
-        next(err)
+            message: "Product created successfully",
+            data: product
+        });
+
+    } catch (error) {
+        next(error);
     }
 }
 
-exports.updateproduct = async (req, res, next) =>{
+exports.updateProduct = async (req, res, next) => {
     try {
         const {name} = req.params;
         
-        const product = await products.findOne({name});
+        const product = await Product.findOne({name});
         if (!product){
             return res.status(400).json({
                 success: false,
@@ -56,23 +58,24 @@ exports.updateproduct = async (req, res, next) =>{
             });
         }
 
-        const updateProduct = await products.findOneAndUpdate({name}, req.body, {new: true});
+        const updatedproduct = await Product.findByIdAndUpdate(name, req.body, { new: true });
         res.status(200).json({
             success: true,
             message: "product updated successfully",
-            product: updateProduct
+            product: updatedproduct
         });
-    } catch (err) {
-        next(err);
+
+    } catch (error) {
+        next(error);
     }
 }
 
-exports.deleteproduct = async (req, res, next) =>{
+exports.deleteProduct = async (req, res, next) => {
     try {
+
         const {name} = req.params;
-        console.log(name);
-        
-        const product = await products.findOne({name});
+
+        const product = await Product.findOne(name);
         if (!product){
             return res.status(400).json({
                 success: false,
@@ -80,13 +83,15 @@ exports.deleteproduct = async (req, res, next) =>{
             });
         }
 
-        const deleteProduct = await products.findOneAndDelete({name});
+        await Product.findByIdAndDelete(name);
+
         res.status(200).json({
             success: true,
-            message: "product deleted successfully",
-            product: deleteProduct
+            message: "Product deleted successfully",
+            data: product
         });
-    } catch (err) {
-        next(err);
+
+    } catch (error) {
+        next(error);
     }
 }
